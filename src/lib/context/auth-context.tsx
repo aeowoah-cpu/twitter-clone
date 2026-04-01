@@ -58,6 +58,7 @@ export function AuthContextProvider({
   const [loading, setLoading] = useState(true);
 
   const manageUser = async (authUser: AuthUser): Promise<void> => {
+      console.log('[v0] manageUser called for:', authUser.email);
       const { uid, displayName, photoURL } = authUser;
 
       const userSnapshot = await getDoc(doc(usersCollection, uid));
@@ -126,10 +127,12 @@ export function AuthContextProvider({
     };
 
     const handleUserAuth = (authUser: AuthUser | null): void => {
+      console.log('[v0] handleUserAuth called with user:', authUser?.email);
       setLoading(true);
 
       if (authUser) void manageUser(authUser);
       else {
+        console.log('[v0] No auth user, clearing state');
         setUser(null);
         setLoading(false);
       }
@@ -166,9 +169,12 @@ export function AuthContextProvider({
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
+      console.log('[v0] Starting Google sign in');
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      console.log('[v0] Google sign in successful:', result.user.email);
     } catch (error) {
+      console.log('[v0] Google sign in error:', error);
       setError(error as Error);
     }
   };
