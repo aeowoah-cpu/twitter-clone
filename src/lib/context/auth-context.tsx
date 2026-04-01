@@ -163,7 +163,6 @@ export function AuthContextProvider({
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (error) {
-      console.log('[v0] signInWithGoogle error:', error);
       setError(error as Error);
     }
   };
