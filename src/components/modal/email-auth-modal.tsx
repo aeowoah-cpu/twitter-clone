@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '@lib/context/auth-context';
-import { Button } from '@components/ui/button';
 import { CustomIcon } from '@components/ui/custom-icon';
 
 type EmailAuthModalProps = {
@@ -153,10 +152,10 @@ export function EmailAuthModal({ onClose }: EmailAuthModalProps): JSX.Element {
             </p>
           )}
 
-          <Button
+          <button
             type='submit'
             disabled={loading}
-            className='mt-2 w-full justify-center bg-light-primary py-2 font-bold text-white transition
+            className='mt-2 w-full rounded-full bg-light-primary py-2 font-bold text-white transition
                        hover:bg-light-primary/90 disabled:cursor-not-allowed disabled:opacity-60
                        dark:bg-dark-primary dark:text-light-primary dark:hover:bg-dark-primary/80'
           >
@@ -167,7 +166,7 @@ export function EmailAuthModal({ onClose }: EmailAuthModalProps): JSX.Element {
               : isSignUp
               ? 'Sign up'
               : 'Sign in'}
-          </Button>
+          </button>
         </form>
 
         <p className='mt-6 text-center text-sm text-light-secondary dark:text-dark-secondary'>

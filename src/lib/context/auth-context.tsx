@@ -57,8 +57,7 @@ export function AuthContextProvider({
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const manageUser = async (authUser: AuthUser): Promise<void> => {
+  const manageUser = async (authUser: AuthUser): Promise<void> => {
       const { uid, displayName, photoURL } = authUser;
 
       const userSnapshot = await getDoc(doc(usersCollection, uid));
@@ -136,7 +135,9 @@ export function AuthContextProvider({
       }
     };
 
+  useEffect(() => {
     onAuthStateChanged(auth, handleUserAuth);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -184,6 +185,9 @@ export function AuthContextProvider({
         password
       );
       await updateProfile(authUser, { displayName: name });
+      // Force onAuthStateChanged to re-fire with the updated profile
+      await authUser.reload();
+      handleUserAuth(auth.currentUser);
     } catch (error) {
       setError(error as Error);
       throw error;
