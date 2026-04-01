@@ -11,8 +11,14 @@ const config = {
 type Config = typeof config;
 
 export function getFirebaseConfig(): Config {
-  if (Object.values(config).some((value) => !value))
-    throw new Error('Firebase config is not set or incomplete');
+  const missingKeys = Object.entries(config)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+  if (missingKeys.length > 0) {
+    console.log('[v0] Missing Firebase env vars:', missingKeys);
+    throw new Error(`Firebase config is missing: ${missingKeys.join(', ')}`);
+  }
 
   return config;
 }
