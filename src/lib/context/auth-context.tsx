@@ -1,6 +1,9 @@
 import { useState, useEffect, useContext, createContext, useMemo } from 'react';
 import {
   signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
   GoogleAuthProvider,
   onAuthStateChanged,
   signOut as signOutFirebase
@@ -36,6 +39,8 @@ type AuthContext = {
   userBookmarks: Bookmark[] | null;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContext | null>(null);
@@ -167,6 +172,36 @@ export function AuthContextProvider({
     }
   };
 
+  const signUpWithEmail = async (
+    email: string,
+    password: string,
+    name: string
+  ): Promise<void> => {
+    try {
+      const { user: authUser } = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      await updateProfile(authUser, { displayName: name });
+    } catch (error) {
+      setError(error as Error);
+      throw error;
+    }
+  };
+
+  const signInWithEmail = async (
+    email: string,
+    password: string
+  ): Promise<void> => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      setError(error as Error);
+      throw error;
+    }
+  };
+
   const signOut = async (): Promise<void> => {
     try {
       await signOutFirebase(auth);
@@ -186,7 +221,9 @@ export function AuthContextProvider({
     randomSeed,
     userBookmarks,
     signOut,
-    signInWithGoogle
+    signInWithGoogle,
+    signUpWithEmail,
+    signInWithEmail
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
