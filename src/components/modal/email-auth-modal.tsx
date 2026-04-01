@@ -63,7 +63,14 @@ export function EmailAuthModal({ onClose }: EmailAuthModalProps): JSX.Element {
           onClick={onClose}
           aria-label='Close'
         >
-          <CustomIcon iconName='CloseIcon' className='h-5 w-5' />
+          <svg className='h-5 w-5' viewBox='0 0 24 24' aria-hidden='true'>
+            <path
+              stroke='currentColor'
+              strokeLinecap='round'
+              strokeWidth='2'
+              d='M6 6l12 12M6 18L18 6'
+            />
+          </svg>
         </button>
 
         <div className='mb-6 flex justify-center'>
