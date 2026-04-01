@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext, createContext, useMemo } from 'react';
 import {
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   GoogleAuthProvider,
   onAuthStateChanged,
   signOut as signOutFirebase
@@ -54,17 +53,6 @@ export function AuthContextProvider({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Handle the result of signInWithRedirect on page load
-    const handleRedirect = async (): Promise<void> => {
-      try {
-        await getRedirectResult(auth);
-      } catch (error) {
-        setError(error as Error);
-      }
-    };
-
-    void handleRedirect();
-
     const manageUser = async (authUser: AuthUser): Promise<void> => {
       const { uid, displayName, photoURL } = authUser;
 
@@ -173,8 +161,9 @@ export function AuthContextProvider({
   const signInWithGoogle = async (): Promise<void> => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithRedirect(auth, provider);
+      await signInWithPopup(auth, provider);
     } catch (error) {
+      console.log('[v0] signInWithGoogle error:', error);
       setError(error as Error);
     }
   };
