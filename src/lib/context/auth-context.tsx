@@ -1,6 +1,9 @@
 import { useState, useEffect, useContext, createContext, useMemo } from 'react';
 import {
   signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
   GoogleAuthProvider,
   onAuthStateChanged,
   signOut as signOutFirebase
@@ -36,6 +39,8 @@ type AuthContext = {
   userBookmarks: Bookmark[] | null;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContext | null>(null);
@@ -52,8 +57,8 @@ export function AuthContextProvider({
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const manageUser = async (authUser: AuthUser): Promise<void> => {
+  const manageUser = async (authUser: AuthUser): Promise<void> => {
+      console.log('[v0] manageUser called for:', authUser.email);
       const { uid, displayName, photoURL } = authUser;
 
       const userSnapshot = await getDoc(doc(usersCollection, uid));
@@ -122,16 +127,20 @@ export function AuthContextProvider({
     };
 
     const handleUserAuth = (authUser: AuthUser | null): void => {
+      console.log('[v0] handleUserAuth called with user:', authUser?.email);
       setLoading(true);
 
       if (authUser) void manageUser(authUser);
       else {
+        console.log('[v0] No auth user, clearing state');
         setUser(null);
         setLoading(false);
       }
     };
 
+  useEffect(() => {
     onAuthStateChanged(auth, handleUserAuth);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -160,10 +169,46 @@ export function AuthContextProvider({
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
+      console.log('[v0] Starting Google sign in');
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      console.log('[v0] Google sign in successful:', result.user.email);
+    } catch (error) {
+      console.log('[v0] Google sign in error:', error);
+      setError(error as Error);
+    }
+  };
+
+  const signUpWithEmail = async (
+    email: string,
+    password: string,
+    name: string
+  ): Promise<void> => {
+    try {
+      const { user: authUser } = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      await updateProfile(authUser, { displayName: name });
+      // Force onAuthStateChanged to re-fire with the updated profile
+      await authUser.reload();
+      handleUserAuth(auth.currentUser);
     } catch (error) {
       setError(error as Error);
+      throw error;
+    }
+  };
+
+  const signInWithEmail = async (
+    email: string,
+    password: string
+  ): Promise<void> => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      setError(error as Error);
+      throw error;
     }
   };
 
@@ -186,7 +231,9 @@ export function AuthContextProvider({
     randomSeed,
     userBookmarks,
     signOut,
-    signInWithGoogle
+    signInWithGoogle,
+    signUpWithEmail,
+    signInWithEmail
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
